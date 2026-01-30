@@ -6,13 +6,16 @@ using System.Windows;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.ComponentModel;
+using Microsoft.Win32;
 
 namespace EspansoAddon
 {
-	public partial class MainWindow : Window
+	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
 		public ObservableCollection<Item> items { get; set; } = new ObservableCollection<Item>();
-		private string path = @"C:\Users\anond\AppData\Roaming\espanso\match\packages\myshit\myshit.yml";
+		private string pathPath;
+		private string path;
+
 		private string _tbReplace;
 		public string TbReplace
 		{
@@ -23,6 +26,7 @@ namespace EspansoAddon
 				OnPropertyChanged(nameof(TbReplace));
 			}
 		}
+
 		private string _tbTrigger;
 		public string TbTrigger
 		{
@@ -34,21 +38,51 @@ namespace EspansoAddon
 			}
 		}
 
-
 		public MainWindow()
 		{
 			InitializeComponent();
 			this.DataContext = this;
+
+			pathPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "path.txt");
+
+			if (File.Exists(pathPath))
+			{
+				path = File.ReadAllText(pathPath);
+				if (!string.IsNullOrEmpty(path) && File.Exists(path))
+				{
+					if (LoadEspansoFile())
+					{
+						fileTextBlock.Text = path;
+					}
+					else
+					{
+						fileTextBlock.Text = "Invalid YAML Format";
+					}
+				}
+				else
+				{
+					fileTextBlock.Text = "Target file missing";
+				}
+			}
+			else
+			{
+				path = string.Empty;
+				fileTextBlock.Text = "No file selected";
+			}
+
 			TheList.ItemsSource = items;
-			LoadEspansoFile();
 		}
+
 		public event PropertyChangedEventHandler PropertyChanged;
 		protected void OnPropertyChanged(string name)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
+
 		private void SaveEspansoFile()
 		{
+			if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+
 			try
 			{
 				var serializer = new SerializerBuilder()
@@ -66,11 +100,11 @@ namespace EspansoAddon
 			}
 		}
 
-		private void LoadEspansoFile()
+		private bool LoadEspansoFile()
 		{
 			try
 			{
-				if (!File.Exists(path)) return;
+				if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
 
 				string yamlContent = File.ReadAllText(path);
 				var deserializer = new DeserializerBuilder()
@@ -80,9 +114,9 @@ namespace EspansoAddon
 
 				var config = deserializer.Deserialize<EspansoConfig>(yamlContent);
 
+				items.Clear();
 				if (config?.Matches != null)
 				{
-					items.Clear();
 					foreach (var match in config.Matches)
 					{
 						if (!string.IsNullOrEmpty(match.Trigger))
@@ -90,11 +124,15 @@ namespace EspansoAddon
 							items.Add(match);
 						}
 					}
+					return true;
 				}
+
+				return config != null;
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message);
+				MessageBox.Show($"YAML Error: {ex.Message}");
+				return false;
 			}
 		}
 
@@ -109,8 +147,39 @@ namespace EspansoAddon
 
 		private void Add_Click(object sender, RoutedEventArgs e)
 		{
-			items.Add(new Item(TbTrigger, TbReplace));
-			SaveEspansoFile();
+			if (!string.IsNullOrWhiteSpace(TbTrigger) && !string.IsNullOrWhiteSpace(TbReplace))
+			{
+				items.Add(new Item(TbTrigger, TbReplace));
+				SaveEspansoFile();
+
+				TbTrigger = string.Empty;
+				TbReplace = string.Empty;
+			}
+		}
+
+		private void fileSelect_Click(object sender, RoutedEventArgs e)
+		{
+			OpenFileDialog fileDialog = new OpenFileDialog();
+			fileDialog.InitialDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "espanso");
+			fileDialog.Filter = "YAML Files (*.yml)|*.yml";
+
+			if (fileDialog.ShowDialog() == true)
+			{
+				string selectedPath = fileDialog.FileName;
+				string oldPath = path;
+				path = selectedPath;
+
+				if (LoadEspansoFile())
+				{
+					File.WriteAllText(pathPath, path);
+					fileTextBlock.Text = path;
+				}
+				else
+				{
+					path = oldPath;
+					fileTextBlock.Text = "BAD FILE";
+				}
+			}
 		}
 	}
 
