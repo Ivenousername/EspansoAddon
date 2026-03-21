@@ -7,6 +7,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using System.ComponentModel;
 using Microsoft.Win32;
+using System.Windows.Input;
 
 namespace EspansoAddon
 {
@@ -135,17 +136,26 @@ namespace EspansoAddon
 				return false;
 			}
 		}
-
+		
 		private void Delete_Click(object sender, RoutedEventArgs e)
 		{
 			if (TheList.SelectedItem is Item selectedItem)
 			{
+				int i = TheList.SelectedIndex;
 				items.Remove(selectedItem);
 				SaveEspansoFile();
+				TheList.SelectedIndex = i;
 			}
 		}
 
+		
+
 		private void Add_Click(object sender, RoutedEventArgs e)
+		{
+			TryAdding();
+		}
+
+		private void TryAdding()
 		{
 			if (!string.IsNullOrWhiteSpace(TbTrigger) && !string.IsNullOrWhiteSpace(TbReplace))
 			{
@@ -180,6 +190,94 @@ namespace EspansoAddon
 					fileTextBlock.Text = "BAD FILE";
 				}
 			}
+		}
+		private void DownKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+		{
+			if (e.Key == System.Windows.Input.Key.Down && Keyboard.Modifiers == ModifierKeys.Control)
+			{
+				MoveItemDown();
+			}
+		}
+
+		private void UpKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+		{
+			if ((e.Key == System.Windows.Input.Key.Up && Keyboard.Modifiers == ModifierKeys.Control))
+			{
+				MoveItemUp();
+			}
+			
+		}
+		private void Down_Click(object sender, RoutedEventArgs e)
+		{
+			MoveItemDown();
+		}
+
+
+		private void Up_Click(object sender, RoutedEventArgs e)
+		{
+			MoveItemUp();
+		}
+
+		private void MoveItemDown()
+		{
+			if (TheList.SelectedIndex < items.Count - 1 && items.Count>=2 && TheList.SelectedItem != null)
+			{
+
+				var originalSelection = TheList.SelectedIndex;
+				Item temp = items[originalSelection];
+				items[originalSelection] = items[originalSelection+1];
+				items[originalSelection+1] = temp;
+				SaveEspansoFile();
+				TheList.SelectedIndex = originalSelection+1;
+			}
+		}
+		private void MoveItemUp()  //This crashed for some fucking reason but it's fine now
+		{
+			if (TheList.SelectedIndex > 0 && items.Count>=2 && TheList.SelectedItem != null)
+			{
+				var originalSelection = TheList.SelectedIndex;
+				Item temp = items[originalSelection];
+				items[originalSelection] = items[originalSelection-1];
+				items[originalSelection-1] = temp;
+				SaveEspansoFile();
+				TheList.SelectedIndex = originalSelection-1;
+			}
+		}
+		private void Quit(object sender, System.Windows.Input.KeyEventArgs e)
+		{
+			if ((e.Key == System.Windows.Input.Key.W && Keyboard.Modifiers == ModifierKeys.Control))
+			{
+				Application.Current.Shutdown();
+			}
+
+		}
+
+		private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			TheList.UnselectAll(); //Apparently doesn't work everywhere?
+
+		}
+
+		private void tbReplace_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key==System.Windows.Input.Key.Enter)
+			{
+				TryAdding();
+				tbTrigger.Focus();
+			}
+		}
+
+		private void tbTrigger_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key==System.Windows.Input.Key.Enter)
+			{
+				tbReplace.Focus();
+			}
+		}
+
+		private void TheList_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+		{
+
 		}
 	}
 
