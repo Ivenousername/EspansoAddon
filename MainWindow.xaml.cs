@@ -139,6 +139,11 @@ namespace EspansoAddon
 		
 		private void Delete_Click(object sender, RoutedEventArgs e)
 		{
+			DeleteSelection();
+		}
+
+		private void DeleteSelection()
+		{
 			if (TheList.SelectedItem is Item selectedItem)
 			{
 				int i = TheList.SelectedIndex;
@@ -148,7 +153,6 @@ namespace EspansoAddon
 			}
 		}
 
-		
 
 		private void Add_Click(object sender, RoutedEventArgs e)
 		{
@@ -243,11 +247,15 @@ namespace EspansoAddon
 				TheList.SelectedIndex = originalSelection-1;
 			}
 		}
-		private void Quit(object sender, System.Windows.Input.KeyEventArgs e)
+		private void Shortkeys_Global(object sender, System.Windows.Input.KeyEventArgs e)
 		{
 			if ((e.Key == System.Windows.Input.Key.W && Keyboard.Modifiers == ModifierKeys.Control))
 			{
 				Application.Current.Shutdown();
+			}
+			else if (e.Key == System.Windows.Input.Key.Delete && TheList.SelectedItem != null )
+			{
+				DeleteSelection();
 			}
 
 		}
@@ -274,10 +282,12 @@ namespace EspansoAddon
 				tbReplace.Focus();
 			}
 		}
-
-		private void TheList_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+		private void DelKeydown(object sender, KeyEventArgs e)
 		{
-
+			if (e.Key == System.Windows.Input.Key.Delete)
+			{
+				DeleteSelection();
+			}
 		}
 	}
 

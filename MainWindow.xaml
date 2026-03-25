@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EspansoAddon"
         mc:Ignorable="d" WindowStyle="ToolWindow" Background="#a488"
         Title="Espanso Manager" Height="450" Width="500" ResizeMode="NoResize" 
-		Icon="EspansoManager.ico" KeyDown="Quit" >
+		Icon="EspansoManager.ico" KeyDown="Shortkeys_Global" >
 	
 	<Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown">
 		<Grid.ColumnDefinitions>
@@ -14,7 +14,7 @@
 			<ColumnDefinition Width="0.5*"/> 
 			<ColumnDefinition Width="0.5*"/>
 		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
+		<Grid.RowDefinitions> 
 			<RowDefinition Height="*"/>
 			<RowDefinition Height="auto"/>
 			<RowDefinition Height="0.3*"/>
@@ -105,12 +105,14 @@
                 Click="Add_Click" MinHeight="25" />
 
 		<Button Name="Delete" Content="Delete" Grid.Column="2" Grid.Row="5" Margin="10,40"
-                Click="Delete_Click" MinHeight="25"/>
+                Click="Delete_Click" MinHeight="25" KeyDown="DelKeydown"/>
 		<Grid Grid.Column="1" Grid.Row="8" Grid.ColumnSpan="2">
 			<Grid.RowDefinitions>
-				<RowDefinition Height="auto"/>
-				<RowDefinition Height="auto"/>
-				<RowDefinition Height="auto"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="auto"/>
@@ -121,11 +123,13 @@
 			<Button Name="Down" Click="Down_Click" Margin="2"
 					Content="↓" Grid.Row="1" Width="25" Height="20"/>
 			<TextBlock Text="ctrl+up key" Grid.Row="0" Grid.Column="1"
-					   Foreground="DarkGray"/>
+					   Margin="1" Foreground="DarkGray"/>
 			<TextBlock Text="ctrl+down key" Grid.Row="1" Grid.Column="1" 
-					   Foreground="DarkGray"/>
+					   Margin="1" Foreground="DarkGray"/>
 			<TextBlock Text="ctrl+w to quit" Grid.Row="2" Grid.Column="1" 
-					   Foreground="DarkGray"/>
+					   Margin="1" Foreground="DarkGray"/>
+			<TextBlock Text="del to delete" Grid.Row="3" Grid.Column="1" 
+					   Margin="1" Foreground="DarkGray"/>
 			
 		</Grid>
 
